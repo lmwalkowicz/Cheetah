@@ -26,7 +26,7 @@ Lightcurve Fitting:
 
 - MCMC implementation - what are the confidence intervals on the fitted parameters?
 
-- # of spots: start with 1, expand to 2 or 3. 
+- number of spots: start with 1, expand to 2 or 3. 
 
 - Revisit issue of how to do multispot fitting (i.e. avoiding overlapping spots)
 
