@@ -23,17 +23,16 @@
 
 from numpy import *
 
-def lcspot(phase, params):
+def lcspot3(phase, lat_deg):
   #Internal constants
   d2r = pi / 180
   
   #Extract stellar and spot properties from parameter vector
-  inc_deg = params[0]
-  lon_deg = params[1]
-  lat_deg = params[2]
-  rad_deg = params[3]
   limb1 = 0.45    #linear coefficient in limb-darkening law
   limb2 = 0.3     #quadratic coefficient in limb-darkening law
+  lon_deg = 180
+  rad_deg = 4
+  inc_deg = 45
   iratio = 0.67   #intensity in spot / intensity out of spot
   
   #Convert input angles from degrees to radians
@@ -190,9 +189,6 @@ def lcspot(phase, params):
   
   lc = 1.0 + (iratio - 1.0) / (pi * (1.0 - limb1/3.0 + limb2/6.0)) * ((1.0 - limb1 + limb2)*ic + (limb1 - 2.0 * limb2)*il + limb2*iq)
   
-  return lc
+  return 1000*lc
 
-
-def lcspotdiffs(params, phase, data):
-  return data - lcspot(phase, params)
 
