@@ -1,0 +1,33 @@
+parameter order: inc, lon, lat, rad
+dist is calculated as sum of ((fitparam/trueparam)-1)^2 for all parameters
+p0 is the initial value for the parameters from the run that gave the best fit
+
+noiseplot1.png
+true params: [ 141.09697152  270.89884007    5.58145714    8.85998289]
+best fit:    [ 129.75919263  271.47352304    1.18363832    7.26169895]
+dist: 0.659842886573
+p0: [165, 180.0, 7, 9]
+
+noiseplot2.png
+true params: [  35.85371074  220.43481295   12.29367407    9.04090862]
+best fit:    [  18.07487814  220.74769717    1.81364667   13.91560275]
+dist: 1.26331816092
+p0: [15, 180.0, 7, 8]
+
+noiseplot3.png
+true params: [ 13.94998404  69.49125586  15.85611802   7.54698999]
+best fit:    [ 16.29157627  71.93045808  18.20389297   7.09898974]
+dist: 0.0548555466105
+p0: [45, 180.0, 67, 7]
+
+noiseplot4.png
+true params: [ 62.65589713  30.21676318  46.88935565   9.6356172 ]
+best fit:    [ 52.34064396  30.77712904  37.66933617   9.11931089]
+dist: 0.0689839616155
+p0: [135, 180.0, 52, 8]
+
+noiseplot5.png
+true params: [  24.15874163  340.85237502   45.61016247    8.22326542]
+best fit:    [  23.4940069   339.74443275   45.10076946    8.253838  ]
+dist: 0.000906212407732
+p0: [15, 180.0, 7, 6]
