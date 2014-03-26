@@ -20,6 +20,7 @@ def genrandlc(phase=arange(0,1,.025), noisefactor=0.05):
     intensity = intensity + noise
   return intensity, tparams, phase
 
+
 def randfit(plsplot=False):
   #generate random single-spot lightcurve
   intensity, tparams, phase = genrandlc()
