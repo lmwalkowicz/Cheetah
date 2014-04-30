@@ -196,3 +196,70 @@ def lcspot(phase, params):
 def lcspotdiffs(params, phase, data):
   return data - lcspot(phase, params)
 
+## DOES NOT WORK ##
+def lcspotdiffs2(params, phase, data):
+  diffs = data - lcspot(phase, params)
+  for p in params:
+    if p < 0.0:
+      diffs = append(diffs, p/-10.0)
+      #print 'penalized by ', p/-10.0
+  if params[0] > 180.0:
+    diffs = append(diffs, (params[0]-180.0)/10.0)
+    #print 'penalized by ', (params[0]-180.0)/10.0
+  if params[1] > 360.0:
+    diffs = append(diffs, (params[1]-360.0)/10.0)
+    #print 'penalized by ', (params[1]-360.0)/10.0
+  if params[2] > 90.0:
+    diffs = append(diffs, (params[2]-90.0)/10.0)
+    #print 'penalized by ', (params[2]-90.0)/10.0
+  return diffs
+
+def lcspotdiffs3(params, phase, data):
+  diffs = abs(data - lcspot(phase, params))
+  for p in params:
+    if p < 0.0:
+      diffs = diffs + (p/-100.0)/len(diffs)
+      #print 'penalized by ', p/-10.0
+  if params[0] > 180.0:
+    diffs = diffs + ((params[0]-180.0)/100.0)/len(diffs)
+    #print 'penalized by ', (params[0]-180.0)/10.0
+  if params[1] > 360.0:
+    diffs = diffs + ((params[1]-360.0)/100.0)/len(diffs)
+    #print 'penalized by ', (params[1]-360.0)/10.0
+  if params[2] > 90.0:
+    diffs = diffs + ((params[2]-90.0)/100.0)/len(diffs)
+    #print 'penalized by ', (params[2]-90.0)/10.0
+  return diffs
+
+def lcspotdiffsfi(params, phase, data, inc):
+  return lcspotdiffs3(array([inc] + list(params)), phase, data)
+
+def lcspotsse(params, phase, data):
+  return sum(lcspotdiffs(params, phase, data)**2)
+
+def lcspotssefi(params, phase, data, inc):
+  return lcspotsse(array([inc] + list(params)), phase, data)
+
+def lcspotfi(phase, inc, sparams):
+  return lcspot(phase, [inc] + list(sparams))
+
+def lccomb(lc1, lc2):
+  return lc1 + lc2 - 1
+
+def lcsep(combined, component):
+  return combined - component + 1
+
+def lcmultispot(phase, pset):
+  inc = pset[0]
+  spots = pset[1:]
+  intensity = 1
+  for spot in spots:
+    intensity = lccomb(intensity, lcspotfi(phase,inc,spot))
+  return intensity
+
+def lcmultispotdiffs(params,phase,data):
+  inc = params[0]
+  nspots = (len(params)-1)/3
+  spots = [[params[i],params[i+1],params[i+2]] for i in range(nspots)]
+  pset = [inc]+spots
+  return abs(data - lcmultispot(phase, pset))
