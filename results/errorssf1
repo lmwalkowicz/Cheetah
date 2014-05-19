@@ -1,0 +1,4 @@
+/Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/scipy/optimize/minpack.py:316: RuntimeWarning: Number of calls to function has reached maxfev = 20.
+  warnings.warn(errors[info][0], RuntimeWarning)
+/Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/scipy/optimize/minpack.py:316: RuntimeWarning: Number of calls to function has reached maxfev = 1000.
+  warnings.warn(errors[info][0], RuntimeWarning)

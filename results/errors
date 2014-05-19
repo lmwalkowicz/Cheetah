@@ -1,0 +1,10 @@
+/Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/scipy/optimize/minpack.py:316: RuntimeWarning: Number of calls to function has reached maxfev = 20.
+  warnings.warn(errors[info][0], RuntimeWarning)
+/Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/scipy/optimize/minpack.py:316: RuntimeWarning: Number of calls to function has reached maxfev = 800.
+  warnings.warn(errors[info][0], RuntimeWarning)
+/Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/scipy/optimize/minpack.py:316: RuntimeWarning: Number of calls to function has reached maxfev = 1600.
+  warnings.warn(errors[info][0], RuntimeWarning)
+/Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/scipy/optimize/minpack.py:316: RuntimeWarning: Number of calls to function has reached maxfev = 1000.
+  warnings.warn(errors[info][0], RuntimeWarning)
+/Library/Frameworks/Python.framework/Versions/6.2/lib/python2.6/site-packages/scipy/cluster/vq.py:570: UserWarning: One of the clusters is empty. Re-run kmean with a different initialization.
+  warnings.warn("One of the clusters is empty. "

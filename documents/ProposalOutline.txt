@@ -1,0 +1,51 @@
+Intro to Problem
+  What are starspots?
+    Cooler areas on the "surface" (photosphere) of a star
+    Caused by internal magnetic field penetrating surface
+    On Sun, vary over an 11-year cycle
+    Solar activity (flares, etc.) tends to occur at or near spots
+  Why do we care about starspots?
+    Internal magnetic fields of s tarts not fully understood (dynamo theory)
+    In general, most stellar data comes from the Sun
+    Starspots could provide info about MF of other stars
+    Also give clear indication of rotation rate
+  What is our data & How can we use it to find starspots?
+    Cannot resolve positional information of (non-Sun) stars
+    Kepler continually measures light intensity of many stars
+    Periodic (brief) dimming used to infer planet revolution
+    Longer-scale variation ("lightcurve") used to infer spots
+  Specific parameters
+    stellar inclination (affects visible area) - semi-degenerate with latitude
+    limb-darkening coefficients - taken as fixed [justification?]
+    number of spots
+    spot radius & position (latitude & longitude)
+    spot contrast - degenerate with radius (taken as fixed)
+    Differential rotation
+    
+Previous Work
+  Ancient History
+    Ismael Boulliau first (incorrectly) proposed starspot hypothesis (1667)
+    Gerald Kron first modern data of light variability (1947)
+    Proposed startspots (correctly) but largely ignored 'til 1960s-70s
+    Several other methods used for detecting spots (Doppler, eclipse mapping, LDR)
+  Mathematics - Generating lightcurve from spot parameters
+    Integrate specific intensity over visible area
+    Several analytic formulations (circular spots) - we use Eker 1994
+    Numerical models also used, but problematic for fitting
+  Fitting - Estimating spot parameters from lightcurve
+    Ribarik et al 2002 - SpotModeL - Levenberg–Marquardt algorithm
+    Croll 2006 - Starspotz - Added MCMC algorithm
+    Graphics & Visualization tie these programs to C & Visual C++
+    We want more accessible treatment for high-throughput analysis
+    [Any other differences between us & previous work?]
+    Walkowicz et al 2012 - Examination of degeneracies
+
+Our Goals
+  Implement Eker equations for lightcurve generation in Python (done)
+  Start by implementing L-M nonlinear least squares
+  Try several fitting algorithms (gradient methods) for better performance
+  Such methods only give local optima; try MCMC for more thorough traversal of param space
+  Provide method of determining appropriate number of spots
+  Also consider HOW multispot fitting is done
+  Start modeling stars with some known parameters (eg. inclination) from other sources
+  Finally, apply to large set of Kepler, trying to draw general conclusions 
