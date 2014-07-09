@@ -24,7 +24,7 @@
 from numpy import *
 import itertools
 
-def lcspot(phase, params):
+def lcspot(time, params):
   #Internal constants
   d2r = pi / 180
   
@@ -33,6 +33,7 @@ def lcspot(phase, params):
   lon_deg = params[1]
   lat_deg = params[2]
   rad_deg = params[3]
+  period = params[4]
   limb1 = 0.45    #linear coefficient in limb-darkening law
   limb2 = 0.3     #quadratic coefficient in limb-darkening law
   iratio = 0.67   #intensity in spot / intensity out of spot
@@ -48,6 +49,7 @@ def lcspot(phase, params):
   sinrad = sin(rad)
   
   #Calculate a vector of rotational phases (could be passed as an argument)
+  phase = time / period
   phi = 2.0 * pi * phase
   nphi = len(phi)
   
@@ -196,29 +198,11 @@ def lcspot(phase, params):
 
 ### Single Spot Helper Functions ###
 
-def lcspotdiffs(params, phase, data):
-  return data - lcspot(phase, params)
+def lcspotdiffs(params, time, data):
+  return data - lcspot(time, params)
 
-## DOES NOT WORK ##
-def lcspotdiffs2(params, phase, data):
-  diffs = data - lcspot(phase, params)
-  for p in params:
-    if p < 0.0:
-      diffs = append(diffs, p/-10.0)
-      #print 'penalized by ', p/-10.0
-  if params[0] > 180.0:
-    diffs = append(diffs, (params[0]-180.0)/10.0)
-    #print 'penalized by ', (params[0]-180.0)/10.0
-  if params[1] > 360.0:
-    diffs = append(diffs, (params[1]-360.0)/10.0)
-    #print 'penalized by ', (params[1]-360.0)/10.0
-  if params[2] > 90.0:
-    diffs = append(diffs, (params[2]-90.0)/10.0)
-    #print 'penalized by ', (params[2]-90.0)/10.0
-  return diffs
-
-def lcspotdiffs3(params, phase, data):
-  diffs = abs(data - lcspot(phase, params))
+def lcspotdiffs3(params, time, data):
+  diffs = abs(data - lcspot(time, params))
   if params[0] < 0.0:
     diffs = diffs + ((params[0]/-45.0)**2)/len(diffs)
   if params[0] > 90.0:
@@ -235,26 +219,26 @@ def lcspotdiffs3(params, phase, data):
     diffs = diffs + ((params[3]/-20.0)**2)/len(diffs)
   return diffs
 
-def lcspotsse(params, phase, data):
-  return sum(lcspotdiffs(params, phase, data)**2)
+def lcspotsse(params, time, data):
+  return sum(lcspotdiffs(params, time, data)**2)
 
-def lcspotsse3(params, phase, data):
-  return sum(lcspotdiffs3(params, phase, data)**2)
+def lcspotsse3(params, time, data):
+  return sum(lcspotdiffs3(params, time, data)**2)
 
 
 ### Fixed Inclination Helper Functions ###
 
-def lcspotfi(phase, inc, sparams):
-  return lcspot(phase, [inc] + list(sparams))
+def lcspotfi(time, inc, sparams):
+  return lcspot(time, [inc] + list(sparams))
 
-def lcspotdiffsfi(params, phase, data, inc):
-  return lcspotdiffs3(array([inc] + list(params)), phase, data)
+def lcspotdiffsfi(params, time, data, inc):
+  return lcspotdiffs3(array([inc] + list(params)), time, data)
 
-def lcspotssefi(params, phase, data, inc):
-  return lcspotsse(array([inc] + list(params)), phase, data)
+def lcspotssefi(params, time, data, inc):
+  return lcspotsse(array([inc] + list(params)), time, data)
 
-def lcspotssefi3(params, phase, data, inc):
-  return sum(lcspotdiffsfi(params, phase, data, inc)**2)
+def lcspotssefi3(params, time, data, inc):
+  return sum(lcspotdiffsfi(params, time, data, inc)**2)
 
 
 ### Multi-Spot Helper Functions ###
@@ -265,20 +249,25 @@ def lccomb(lc1, lc2):
 def lcsep(combined, component):
   return combined - component + 1
 
-def lcmultispot(phase, pset):
+def lcmultispot(time, pset):
   inc = pset[0]
-  spots = pset[1:]
+  teq = pset[1]
+  alpha = pset[2]
+  spots = pset[3:]
   intensity = 1
   for spot in spots:
-    intensity = lccomb(intensity, lcspotfi(phase,inc,spot))
+    tspot = teq / (1.0 - alpha * sin(spot[1] * pi / 180.0)**2)
+    intensity = lccomb(intensity, lcspot(time,[inc]+list(spot)+[tspot]))
   return intensity
 
-def lcmultispotdiffs(params,phase,data):
+def lcmultispotdiffs(params,time,data):
   inc = params[0]
-  nspots = (len(params)-1)/3
-  spots = [[params[1+3*i],params[1+3*i+1],params[1+3*i+2]] for i in range(nspots)]
-  pset = [inc]+spots
-  diffs = abs(data - lcmultispot(phase, pset))
+  teq = params[1]
+  alpha = params[2]
+  nspots = (len(params)-3)/3
+  spots = [[params[3+3*i],params[3+3*i+1],params[3+3*i+2]] for i in range(nspots)]
+  pset = [inc,teq,alpha]+spots
+  diffs = abs(data - lcmultispot(time, pset))
   if inc < 0.0:
     diffs = diffs + ((inc/-45.0)**2)/len(diffs)
   if inc > 90.0:
@@ -296,18 +285,20 @@ def lcmultispotdiffs(params,phase,data):
       diffs = diffs + ((s[2]/-20.0)**2)/len(diffs)
   return diffs
 
-def lcmultispotsse(params, phase, data):
+def lcmultispotsse(params, time, data):
   inc = params[0]
-  nspots = (len(params)-1)/3
-  spots = [[params[1+3*i],params[1+3*i+1],params[1+3*i+2]] for i in range(nspots)]
-  pset = [inc]+spots
-  diffs = abs(data - lcmultispot(phase, pset))
+  teq = params[1]
+  alpha = params[2]
+  nspots = (len(params)-3)/3
+  spots = [[params[3+3*i],params[3+3*i+1],params[3+3*i+2]] for i in range(nspots)]
+  pset = [inc,teq,alpha]+spots
+  diffs = abs(data - lcmultispot(time, pset))
   return sum(diffs**2)
 
 
 ### Other Helper Functions ###
 
-def paramdist(fps, tps, scalevals=array([45.0, 180.0, 90.0, 17.5])):
+def paramdist(fps, tps, scalevals=array([45.0, 180.0, 90.0, 17.5, 1.0])):
   return sqrt(sum(((array(fps) - array(tps))/array(scalevals))**2))
 
 def spotparamdist(fps, tps, scalevals=array([180.0, 90.0, 17.5])):
@@ -315,15 +306,6 @@ def spotparamdist(fps, tps, scalevals=array([180.0, 90.0, 17.5])):
 
 def multispotparamdist(fps, tps, scalevals=array([180.0, 90.0, 17.5])):
   return sqrt(sum(array([spotparamdist(fps[i], tps[i], scalevals) for i in range(len(fps))])**2))
-
-def multiparamdists(fps,tps,scalevals=array([45.0, 180.0, 90.0, 17.5])):
-  incdist = abs(fps[0] - tps[0])/scalevals[0]
-  ssvs = scalevals[1:]
-  fspots = fps[1:]
-  tspots = tps[1:]
-  fspots, tspots, sdist = spotmatch(fspots,tspots,ssvs)
-  nspots = len(fspots)
-  return [incdist] + sorted([spotparamdist(fspots[i],tspots[i]) for i in range(nspots)])
   
 def spotmatch(fspots,tspots,scalevals=array([180.0, 90.0, 17.5])):
   nspots = len(fspots)
@@ -341,25 +323,27 @@ def spotmatch(fspots,tspots,scalevals=array([180.0, 90.0, 17.5])):
     return nfspots, ntspots, mindist
 
 def fpl2gpl(fpl):
-  return [fpl[0]] + [[fpl[1+3*i],fpl[1+3*i+1],fpl[1+3*i+2]] for i in range((len(fpl)-1)/3)]
+  return [fpl[0], fpl[1], fpl[2]] + [[fpl[3+3*i],fpl[3+3*i+1],fpl[3+3*i+2]] for i in range((len(fpl)-3)/3)]
 
 def gpl2fpl(gpl):
-  return [gpl[0]] + [sp for sps in gpl[1:] for sp in sps]
+  return [gpl[0], gpl[1], gpl[2]] + [sp for sps in gpl[3:] for sp in sps]
 
 def spacedvals(min, max, nvals):
   spacing = (max - min)/double(nvals)
   return arange(min+(spacing/2.0),max,spacing)
 
-def spacedparams(nvals, minr=10, maxr=25):
+def spacedparams(nvals, minr=10, maxr=25, mint=-3.0, maxt=3.0):
   incvals = spacedvals(0,90,nvals)
   lonvals = spacedvals(0,360,nvals)
   latvals = spacedvals(-90,90,nvals)
   radvals = spacedvals(minr,maxr,nvals)
-  return [list(x) for x in itertools.product(incvals,lonvals,latvals,radvals)]
+  pervals = spacedvals(mint,maxt,nvals)
+  return [list(x) for x in itertools.product(incvals,lonvals,latvals,radvals,pervals)]
 
-def spacedparamsfi(nvals, minr=10, maxr=25):
+def spacedparamsfi(nvals, minr=10, maxr=25, mint=-3.0, maxt=3.0):
   lonvals = spacedvals(0,360,nvals)
   latvals = spacedvals(-90,90,nvals)
   radvals = spacedvals(minr,maxr,nvals)
-  return [list(x) for x in itertools.product(lonvals,latvals,radvals)]
+  pervals = spacedvals(mint,maxt,nvals)
+  return [list(x) for x in itertools.product(lonvals,latvals,radvals,pervals)]
 
