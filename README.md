@@ -8,8 +8,13 @@ Lucianne Walkowicz (Princeton Dept of Astrophysical Sciences)
 Michael Thomas (Princeton 'XX --> what is your year, MT?)
 Adam Finkestein (Princeton Computer Science Dept)
 
+NEXT STEPS (AF notes from 2014-05-28):
+- try > 2 spots with synth data
+- range of periods
+- cluster to run multiple experiments in parallel (ionic?)
+- other optimization strategies instead of just L-M / nonlinear simplex...? (just try stuff built into python libraries)
 
-Plan of action, thus far:
+OLD Plan of action:
 
 Code Logistics:
 - AF + MT find their GitHub passwords and send them to LW
