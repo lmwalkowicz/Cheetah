@@ -240,6 +240,19 @@ def lcspotssefi(params, time, data, inc):
 def lcspotssefi3(params, time, data, inc):
   return sum(lcspotdiffsfi(params, time, data, inc)**2)
 
+def lcspotfstar(time, inc, teq, alpha, sparams):
+  lat = sparams[1]
+  period = teq / (1 - alpha * sin(lat)**2)
+  return lcspot(time, [inc] + list(sparams) + [period])
+
+def lcspotdiffsfstar(params, time, data, inc, teq, alpha):
+  lat = params[1]
+  period = teq / (1 - alpha * sin(lat)**2)
+  return lcspotdiffs3(array([inc] + list(params) + [period]), time, data)
+
+def lcspotssefstar(params, time, data, inc, teq, alpha):
+  return sum(data - lcspotfstar(time, inc, teq, alpha, params))**2
+
 
 ### Multi-Spot Helper Functions ###
 
@@ -346,4 +359,10 @@ def spacedparamsfi(nvals, minr=10, maxr=25, mint=-3.0, maxt=3.0):
   radvals = spacedvals(minr,maxr,nvals)
   pervals = spacedvals(mint,maxt,nvals)
   return [list(x) for x in itertools.product(lonvals,latvals,radvals,pervals)]
+
+def spacedparamsspot(nvals, minr=10, maxr=25):
+  lonvals = spacedvals(0,360,nvals)
+  latvals = spacedvals(-90,90,nvals)
+  radvals = spacedvals(minr,maxr,nvals)
+  return [list(x) for x in itertools.product(lonvals,latvals,radvals)]
 

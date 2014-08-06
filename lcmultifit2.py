@@ -6,20 +6,24 @@ from lcgenerate import *
 import sys
 if '-p' in sys.argv: import matplotlib.pyplot as plt
 
-def doublefit(lctuple, nspots, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint='some', plsplot=False):
-  if nspots != int(nspots) or nspots < 1:
-    raise ValueError('nspots must be positive integer')
+
+def doublefit(lctuple, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint='some', plsplot=False):
   time, intensity = lctuple
-  fit1ps = vincfit((time,intensity), p0s, initsteps, nclusters, threshratio, plsprint=plsprint, plsplot=plsplot)
+  fit1ps = vincfit(lctuple, p0s, initsteps, nclusters, threshratio, plsprint=plsprint, plsplot=plsplot)
+  paramsets = []
   for p1 in fit1ps:
     inc = p1[0]
-    iresidual = lcsep(intensity, lcspot(phase,p1))
+    iresidual = lcsep(intensity, lcspot(time,p1))
     fit2ps = fincfit((time,iresidual), inc, p0s, initsteps, nclusters, threshratio, plsprint=plsprint, plsplot=plsplot)
     for p2 in fit2ps:
-      
-    
-    rspots = sequentialfithelper((phase,iresidual),inc,nspots,2,p0s,initsteps,nclusters,threshratio,plsprint,plsplot)
-    paramsets = paramsets + [[inc,firstspot] + rs for rs in rspots]
+      lat1 = p1[2]
+      T1 = p1[4]
+      lat2 = p2[1]
+      T2 = p2[3]
+      alpha = (T1 - T2)/((T1 * sin(lat1)**2) - (T2 * sin(lat2)**2))
+      Teq = T1 * (1 - alpha * sin(lat1)**2)
+      paramsets.append([inc, Teq, alpha, p1[1:4], p2[0:3]])
+  return simulfit(lctuple, 2, paramsets, threshratio, plsprint, plsplot)
 
 
 def simulfit(lctuple, nspots, p0s, threshratio=2, plsprint='some', plsplot=False):
@@ -90,24 +94,16 @@ def simulfit(lctuple, nspots, p0s, threshratio=2, plsprint='some', plsplot=False
   return bestps
 
 
-def combinedfit(lctuple, nspots, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint='some', plsplot=False):
-  if nspots != int(nspots) or nspots < 1:
-    raise ValueError('nspots must be positive integer')
-  paramsets = sequentialfit(lctuple, nspots, p0s, initsteps, nclusters, threshratio, plsprint, plsplot)
-  paramsets = simulfit(lctuple, nspots, paramsets, threshratio, plsprint, plsplot)
-  return paramsets
-
-
 def ratchetfit(lctuple, nspots, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint='some', plsplot=False):
   if nspots != int(nspots) or nspots < 2:
     raise ValueError('nspots must be positive integer >= 2')
-  phase, intensity = lctuple
-  paramsets = combinedfit(lctuple, 2, p0s, initsteps, nclusters, threshratio, plsprint, plsplot)
+  time, intensity = lctuple
+  paramsets = doublefit(lctuple, p0s, initsteps, nclusters, threshratio, plsprint, plsplot)
   for spotnum in range(3,nspots+1):
     newparamsets = []
     for pset in paramsets:
-      iresidual = lcsep(intensity, lcmultispot(phase,pset))
-      spotps = fincfit((phase,iresidual), pset[0], p0s, initsteps, nclusters, threshratio, plsprint, plsplot, spotnum)
+      iresidual = lcsep(intensity, lcmultispot(time,pset))
+      spotps = fstarfit((time,iresidual), pset[0], pset[1], pset[2], [], initsteps, nclusters, threshratio, plsprint, plsplot, spotnum)
       newparamsets = newparamsets + [pset + [spotp] for spotp in spotps]
     paramsets = simulfit(lctuple, spotnum, newparamsets, threshratio, plsprint, plsplot)
   return paramsets
