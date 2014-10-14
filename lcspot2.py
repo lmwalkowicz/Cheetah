@@ -32,7 +32,7 @@ def lcspot(time, params):
   inc_deg = params[0]
   lon_deg = params[1]
   lat_deg = params[2]
-  rad_deg = params[3]
+  rad_deg = abs(params[3])
   period = params[4]
   limb1 = 0.45    #linear coefficient in limb-darkening law
   limb2 = 0.3     #quadratic coefficient in limb-darkening law
@@ -110,6 +110,7 @@ def lcspot(time, params):
     rad0_g = abs( the0_g - pi/2 )
     
     #Useful quantities.
+    #if any(abs(cosphi0_g) > 1.0): print 'IVW @ 114 & 115',params
     phi0_g = arccos(cosphi0_g)
     sinphi0_g = sqrt(1.0 - cosphi0_g**2)
     cosrad0_g = cos(rad0_g)
@@ -129,6 +130,7 @@ def lcspot(time, params):
     
     #Calculate intensity integrals for phases when spot is fully visible.
     #Constant intensity integral. See equation 17 of Eker (1994)
+    #if any(abs(cosrad / sinthe0_g) > 1.0): print 'IVW @ 134',params
     ic[jg] = phi0_g * costhe0_g * sinrad**2 - arcsin(cosrad / sinthe0_g) - 0.5 * sinthe0_g * sinphi0_g * sin(2*rad) + pi/2
     
     #Apply corrections to linear and quadratic intensity integrals.
@@ -151,6 +153,7 @@ def lcspot(time, params):
     rad0_c = abs( the0_c - pi/2 )
     
     #Useful quantities.
+    #if any(abs(cosphi0_c) > 1.0): print 'IVW @ 157 & 158',params
     phi0_c = arccos(cosphi0_c)
     sinphi0_c = sqrt(1.0 - cosphi0_c**2)
     cosrad0_c = cos(rad0_c)
@@ -170,6 +173,7 @@ def lcspot(time, params):
     
     #Calculate intensity integrals for phases when spot is fully visible.
     #Constant intensity integral. See equation 17 of Eker (1994)
+    #if any(abs(cosrad / sinthe0_c) > 1.0): print 'IVW @ 177',params
     ic[jc] = phi0_c * costhe0_c * sinrad**2 - arcsin(cosrad / sinthe0_c) - 0.5 * sinthe0_c * sinphi0_c * sin(2*rad) + pi/2
     
     #Linear intensity integral. See equation 19a of Eker (1994)
@@ -311,14 +315,14 @@ def lcmultispotsse(params, time, data):
 
 ### Other Helper Functions ###
 
-def paramdist(fps, tps, scalevals=array([45.0, 180.0, 90.0, 17.5, 1.0])):
+def paramdist(fps, tps, scalevals=array([45.0, 180.0, 90.0, 17.5, 25.0])):
   return sqrt(sum(((array(fps) - array(tps))/array(scalevals))**2))
 
 def spotparamdist(fps, tps, scalevals=array([180.0, 90.0, 17.5])):
   return paramdist(fps, tps, scalevals)
 
 def multispotparamdist(fps, tps, scalevals=array([180.0, 90.0, 17.5])):
-  return sqrt(sum(array([spotparamdist(fps[i], tps[i], scalevals) for i in range(len(fps))])**2))
+  return sqrt(sum(array([paramdist(fps[i], tps[i], scalevals) for i in range(len(fps))])**2))
   
 def spotmatch(fspots,tspots,scalevals=array([180.0, 90.0, 17.5])):
   nspots = len(fspots)
@@ -345,7 +349,7 @@ def spacedvals(min, max, nvals):
   spacing = (max - min)/double(nvals)
   return arange(min+(spacing/2.0),max,spacing)
 
-def spacedparams(nvals, minr=10, maxr=25, mint=-3.0, maxt=3.0):
+def spacedparams(nvals, minr=10, maxr=25, mint=1.0, maxt=45.0):
   incvals = spacedvals(0,90,nvals)
   lonvals = spacedvals(0,360,nvals)
   latvals = spacedvals(-90,90,nvals)
@@ -353,7 +357,7 @@ def spacedparams(nvals, minr=10, maxr=25, mint=-3.0, maxt=3.0):
   pervals = spacedvals(mint,maxt,nvals)
   return [list(x) for x in itertools.product(incvals,lonvals,latvals,radvals,pervals)]
 
-def spacedparamsfi(nvals, minr=10, maxr=25, mint=-3.0, maxt=3.0):
+def spacedparamsfi(nvals, minr=10, maxr=25, mint=1.0, maxt=45.0):
   lonvals = spacedvals(0,360,nvals)
   latvals = spacedvals(-90,90,nvals)
   radvals = spacedvals(minr,maxr,nvals)

@@ -2,9 +2,8 @@
 from numpy import *
 from lcspot2 import *
 from lcsinglefit2 import *
-from lcgenerate import *
-import sys
-if '-p' in sys.argv: import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+plt.ion()
 
 
 def doublefit(lctuple, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint='some', plsplot=False):
@@ -108,33 +107,3 @@ def ratchetfit(lctuple, nspots, p0s=[], initsteps=20, nclusters=30, threshratio=
     paramsets = simulfit(lctuple, spotnum, newparamsets, threshratio, plsprint, plsplot)
   return paramsets
 
-
-def main():
-  if '-a' in sys.argv:
-    pr = 'all'
-  else:
-    pr = 'some'
-  ns = int(sys.argv[-1])
-  
-  phase, intesity, tparams = genmultilc(nspots=ns,noisefactor=0.0)
-  print 'tparams:', tparams
-  print
-  
-  paramsets = ratchetfit((phase,intesity),ns,plsprint=pr,plsplot='-p' in sys.argv)
-  pdists = [multiparamdists(fps,tparams) for fps in paramsets]
-  
-  print
-  print 'tparams:', tparams
-  print 'final param sets:'
-  for i in range(len(paramsets)):
-    print 'params: ', paramsets[i]
-    print 'pdists: ', pdists[i]
-  
-  if '-p' in sys.argv:
-    for i in plt.get_fignums():
-      plt.figure(i)
-      plt.savefig('figure%d.png' % i)
-
-  
-if 'lcmultifit.py' in sys.argv:
-  main()

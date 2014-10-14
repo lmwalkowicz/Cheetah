@@ -4,15 +4,14 @@ from scipy.optimize import leastsq
 from lcspot2 import *
 from scipy.cluster.vq import whiten
 from scipy.cluster.vq import kmeans2
-import sys
-if '-p' in sys.argv: import matplotlib.pyplot as plt
-
+import matplotlib.pyplot as plt
+plt.ion()
 
 def vincfit(lctuple, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint='some', plsplot=False):
   time, intensity = lctuple
   
   if plsprint != 'none':
-    print 'first spot'
+    print 'single spot fit'
     print 'lightcurve:'
     print intensity
     print
@@ -45,7 +44,7 @@ def vincfit(lctuple, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint
   for i in range(1,len(opts)):
     if sses[i] > threshold:
       break
-    if min([paramdist(opts[i],k) for k in bestps]) > 0.001:
+    if min([paramdist(opts[i],k,scalevals=array([45.0, 180.0, 90.0, 17.5, 25.0])) for k in bestps]) > 0.001:
       bestps.append(opts[i])
       bestsses.append(sses[i])
       bestp1s.append(p1s[i])
@@ -71,7 +70,7 @@ def vincfit(lctuple, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint
     plt.plot(time, intensity, 'r.')
     for i in range(0,len(bestps)):
       plt.plot(time, lcspot(time,bestps[i]), colors[i%len(colors)])
-    plt.title('initial single spot fit')
+    plt.title('single spot fit')
     plt.xlabel('time')
     plt.ylabel('intensity')
     #plt.show()
@@ -79,11 +78,11 @@ def vincfit(lctuple, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint
   return bestps
 
 
-def fincfit(lctuple, inc, p0s=[], initsteps=20, nclusters=20, threshratio=2, plsprint='some', plsplot=False, snum=-1):
+def fincfit(lctuple, inc, p0s=[], initsteps=20, nclusters=20, threshratio=2, plsprint='some', plsplot=False):
   time, intensity = lctuple
   
   if plsprint != 'none':
-    print 'inc:', inc, 'spot #', snum
+    print 'fixed-inc fit, inc:', inc
     print 'residual lightcurve:'
     print intensity
     print
@@ -116,7 +115,7 @@ def fincfit(lctuple, inc, p0s=[], initsteps=20, nclusters=20, threshratio=2, pls
   for i in range(1,len(opts)):
     if sses[i] > threshold:
       break
-    if min([spotparamdist(opts[i],k) for k in bestps]) > 0.001:
+    if min([paramdist(opts[i],k,scalevals=array([180.0, 90.0, 17.5, 25.0])) for k in bestps]) > 0.001:
       bestps.append(opts[i])
       bestsses.append(sses[i])
       bestp1s.append(p1s[i])
@@ -144,7 +143,7 @@ def fincfit(lctuple, inc, p0s=[], initsteps=20, nclusters=20, threshratio=2, pls
       plt.plot(time, lcspotfi(time,inc,bestps[i]), colors[i%len(colors)])
     plt.xlabel('time')
     plt.ylabel('residual intensity')
-    plt.title('inc: ' + str(inc) + ', spot #' + str(snum))
+    plt.title('fixed-inc fit, inc: ' + str(inc))
     #plt.show()
   
   return bestps
@@ -154,7 +153,7 @@ def fstarfit(lctuple, inc, teq, alpha, p0s=[], initsteps=20, nclusters=20, thres
   time, intensity = lctuple
   
   if plsprint != 'none':
-    print 'inc:', inc, 'spot #', snum
+    print 'fixed-star fit, inc:', inc, 'teq:', teq, 'alpha:', alpha, 'spot #', snum
     print 'residual lightcurve:'
     print intensity
     print
@@ -187,7 +186,7 @@ def fstarfit(lctuple, inc, teq, alpha, p0s=[], initsteps=20, nclusters=20, thres
   for i in range(1,len(opts)):
     if sses[i] > threshold:
       break
-    if min([spotparamdist(opts[i],k) for k in bestps]) > 0.001:
+    if min([paramdist(opts[i],k,scalevals=array([180.0, 90.0, 17.5])) for k in bestps]) > 0.001:
       bestps.append(opts[i])
       bestsses.append(sses[i])
       bestp1s.append(p1s[i])
@@ -215,7 +214,7 @@ def fstarfit(lctuple, inc, teq, alpha, p0s=[], initsteps=20, nclusters=20, thres
       plt.plot(time, lcspotfi(time,inc,bestps[i]), colors[i%len(colors)])
     plt.xlabel('time')
     plt.ylabel('residual intensity')
-    plt.title('inc: ' + str(inc) + ', spot #' + str(snum))
+    plt.title('inc: ' + str(inc) + ', teq: ' + str(teq) + ', alpha: ' + str(alpha) + ', spot #' + str(snum))
     #plt.show()
   
   return bestps
