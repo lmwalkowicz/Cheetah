@@ -38,14 +38,14 @@ def vincfit(lctuple, p0s=[], initsteps=20, nclusters=30, threshratio=2, plsprint
   
   #find best fit(s)
   threshold = sses[0]*threshratio
-  bestps = [opts[0]]
+  bestps = [boundparams(opts[0])]
   bestsses = [sses[0]]
   bestp1s = [p1s[0]]
   for i in range(1,len(opts)):
     if sses[i] > threshold:
       break
-    if min([paramdist(opts[i],k,scalevals=array([45.0, 180.0, 90.0, 17.5, 25.0])) for k in bestps]) > 0.001:
-      bestps.append(opts[i])
+    if min([paramdist(boundparams(opts[i]),k,scalevals=array([45.0, 180.0, 90.0, 17.5, 25.0])) for k in bestps]) > 0.001:
+      bestps.append(boundparams(opts[i]))
       bestsses.append(sses[i])
       bestp1s.append(p1s[i])
   
@@ -109,14 +109,14 @@ def fincfit(lctuple, inc, p0s=[], initsteps=20, nclusters=20, threshratio=2, pls
   
   #find best fit(s)
   threshold = sses[0]*threshratio
-  bestps = [opts[0]]
+  bestps = [boundparamsfi(opts[0])]
   bestsses = [sses[0]]
   bestp1s = [p1s[0]]
   for i in range(1,len(opts)):
     if sses[i] > threshold:
       break
-    if min([paramdist(opts[i],k,scalevals=array([180.0, 90.0, 17.5, 25.0])) for k in bestps]) > 0.001:
-      bestps.append(opts[i])
+    if min([paramdist(boundparamsfi(opts[i]),k,scalevals=array([180.0, 90.0, 17.5, 25.0])) for k in bestps]) > 0.001:
+      bestps.append(boundparamsfi(opts[i]))
       bestsses.append(sses[i])
       bestp1s.append(p1s[i])
   
@@ -180,14 +180,14 @@ def fstarfit(lctuple, inc, teq, alpha, p0s=[], initsteps=20, nclusters=20, thres
   
   #find best fit(s)
   threshold = sses[0]*threshratio
-  bestps = [opts[0]]
+  bestps = [boundparamsfstar(opts[0])]
   bestsses = [sses[0]]
   bestp1s = [p1s[0]]
   for i in range(1,len(opts)):
     if sses[i] > threshold:
       break
-    if min([paramdist(opts[i],k,scalevals=array([180.0, 90.0, 17.5])) for k in bestps]) > 0.001:
-      bestps.append(opts[i])
+    if min([paramdist(boundparamsfstar(opts[i]),k,scalevals=array([180.0, 90.0, 17.5])) for k in bestps]) > 0.001:
+      bestps.append(boundparamsfstar(opts[i]))
       bestsses.append(sses[i])
       bestp1s.append(p1s[i])
   

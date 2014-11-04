@@ -28,12 +28,15 @@ def lcspot(time, params):
   #Internal constants
   d2r = pi / 180
   
+  #Impose Boundaries
+  bps = boundparams(params)
+  
   #Extract stellar and spot properties from parameter vector
-  inc_deg = params[0]
-  lon_deg = params[1]
-  lat_deg = params[2]
-  rad_deg = abs(params[3])
-  period = params[4]
+  inc_deg = bps[0]
+  lon_deg = bps[1]
+  lat_deg = bps[2]
+  rad_deg = bps[3]
+  period = bps[4]
   limb1 = 0.45    #linear coefficient in limb-darkening law
   limb2 = 0.3     #quadratic coefficient in limb-darkening law
   iratio = 0.67   #intensity in spot / intensity out of spot
@@ -206,22 +209,23 @@ def lcspotdiffs(params, time, data):
   return data - lcspot(time, params)
 
 def lcspotdiffs3(params, time, data):
-  diffs = abs(data - lcspot(time, params))
+  diffs = data - lcspot(time, params)
+  penalty = 0.0
   if params[0] < 0.0:
-    diffs = diffs + ((params[0]/-45.0)**2)/len(diffs)
+    penalty = penalty + ((-params[0]/45.0)**2)/len(diffs)
   if params[0] > 90.0:
-    diffs = diffs + (((params[0]-90.0)/45.0)**2)/len(diffs)
+    penalty = penalty + (((params[0] - 90.0)/45.0)**2)/len(diffs)
   if params[1] < 0.0:
-    diffs = diffs + ((params[1]/-180.0)**2)/len(diffs)
+    penalty = penalty + ((-params[1]/180.0)**2)/len(diffs)
   if params[1] > 360.0:
-    diffs = diffs + (((params[1]-360.0)/180.0)**2)/len(diffs)
+    penalty = penalty + (((params[1] - 360.0)/180.0)**2)/len(diffs)
   if params[2] < -90.0:
-    diffs = diffs + (((params[2]+90.0)/-90.0)**2)/len(diffs)
+    penalty = penalty + (((-params[2] - 90.0)/90.0)**2)/len(diffs)
   if params[2] > 90.0:
-    diffs = diffs + (((params[2]-90.0)/90.0)**2)/len(diffs)
-  if params[3] < 0.0:
-    diffs = diffs + ((params[3]/-20.0)**2)/len(diffs)
-  return diffs
+    penalty = penalty + (((params[2] - 90.0)/90.0)**2)/len(diffs)
+  if params[3] < 0.01:
+    penalty = penalty + (((-params[3] + 0.01)/20.0)**2)/len(diffs)
+  return sqrt(diffs**2 + penalty)
 
 def lcspotsse(params, time, data):
   return sum(lcspotdiffs(params, time, data)**2)
@@ -370,3 +374,33 @@ def spacedparamsspot(nvals, minr=10, maxr=25):
   radvals = spacedvals(minr,maxr,nvals)
   return [list(x) for x in itertools.product(lonvals,latvals,radvals)]
 
+def boundparams(params):
+  cps = copy(params)
+  if cps[0] < 0.0:   cps[0] = 0.0
+  if cps[0] > 90.0:  cps[0] = 90.0
+  if cps[1] < 0.0:   cps[1] = 0.0
+  if cps[1] > 360.0: cps[1] = 360.0
+  if cps[2] < -90.0: cps[2] = -90.0
+  if cps[2] > 90.0:  cps[2] = 90.0
+  if cps[3] < 0.01:  cps[3] = 0.01
+  if cps[4] < 0.01:  cps[4] = 0.01
+  return cps
+
+def boundparamsfi(params):
+  cps = copy(params)
+  if cps[0] < 0.0:   cps[0] = 0.0
+  if cps[0] > 360.0: cps[0] = 360.0
+  if cps[1] < -90.0: cps[1] = -90.0
+  if cps[1] > 90.0:  cps[1] = 90.0
+  if cps[2] < 0.01:  cps[2] = 0.01
+  if cps[3] < 0.01:  cps[3] = 0.01
+  return cps
+
+def boundparamsfstar(params):
+  cps = copy(params)
+  if cps[0] < 0.0:   cps[0] = 0.0
+  if cps[0] > 360.0: cps[0] = 360.0
+  if cps[1] < -90.0: cps[1] = -90.0
+  if cps[1] > 90.0:  cps[1] = 90.0
+  if cps[2] < 0.01:  cps[2] = 0.01
+  return cps
