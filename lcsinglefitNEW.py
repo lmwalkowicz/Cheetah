@@ -218,7 +218,7 @@ def filcfits(time,intensity,inc,p0s=[],mfev=0):
   p0s2 = []
   for p0 in p0s:
     try:
-      fps, iem = leastsq(lcspotdiffsfi2, p0, args=(time,intensity,inc), maxfev=mfev)
+      fps, iem = leastsq(lcspotdiffsfi3, p0, args=(time,intensity,inc), maxfev=mfev)
       opts.append(fps)
       sses.append(lcspotssefi(fps,time,intensity,inc))
       p0s2.append(p0)
@@ -235,7 +235,7 @@ def fstarfits(time,intensity,inc,teq,alpha,p0s=[],mfev=0):
   p0s2 = []
   for p0 in p0s:
     try:
-      fps, iem = leastsq(lcspotdiffsfstar2, p0, args=(time,intensity,inc,teq,alpha), maxfev=mfev)
+      fps, iem = leastsq(lcspotdiffsfstar3, p0, args=(time,intensity,inc,teq,alpha), maxfev=mfev)
       opts.append(fps)
       sses.append(lcspotssefstar(fps,time,intensity,inc,teq,alpha))
       p0s2.append(p0)

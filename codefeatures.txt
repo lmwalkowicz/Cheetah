@@ -1,0 +1,38 @@
+Code Features
+
+Conversion From Time to Phase
+The original lcspot algorithm computes the light intesity expected based on a spot with given parameters at a specified series of phases in that spot’s rotation. To apply this to real star with spots rotating at slightly different periods (see Differential Rotation, below) our inital data is stored in real time and this must be converted to spot phase for each spot. This is handled at the beginning of the lcspot algorithm. Without loss of generality, time 0 is assumed to correspond to phase 0 for all spots, and longitute specifies each spot’s initial rotational position.
+
+Parameter Boundaries
+The lcspot.boundparams family of functions enforces boundaries on the parameters. Spot radius and rotational period are physically required to be positive quantities, and are thus restricted to be >= 0.01. Spot latitude is restricted to between -90 and 90 degrees, longitude is restricted to between 0 and 360 degrees, and stellar inclination is restricted to between 0 and 90 degrees. Parameter values outside these ranges can be conceptually equated with equivalent values inside the “canonical” ranges through rotations and reflections of the star. These are implemented via lcspot.canonicize. In this way the parameter space can be treated as unbounded for those parameters.
+
+Lightcurve Combination & Separation
+Because lightcurve intensity (f) is normalized to a maximum of 1, the quantity (1 - f) essentialy describes the fraction of light lost by the spots represented in the lightcurve. Thus, two lightcurves representing different spots can be combined into a single lightcurve using
+fc = 1 - (1 - f1) - (1 - f2) = f1 + f2 - 1
+Similarly lightcurves can be separated using
+f2 = fc - f1 + 1
+These are implemented by lcspot.lccomb and lcspot.lcsep.
+
+Asymmetric Penalization
+During sequential fitting, we want to avoid attempting to explain too much of the lightcurve with a single large spot when really there should be several smaller ones. Thus, we more heavily penalize a potential fit for dipping below the target lightcurve than for lying above it. This is implemented simply by multiplying the positive difference between the data and the fit by a fixed factor when computing the SSE. Currently, that factor is set to 4.
+
+Residual Renormalization
+Because the fit may still dip slightly below the data lcspot.lcsep can produce a residual lightcurve with values > 1, which is not considered to be a valid lightcurve. Thus, the residual lightcurve must be renormalized to a maximum of 1. This can potentially result in the sequential fitting algorithm producing spots that are a bit larger than they should be. We assume, however, that these will be fixed during the simultaneous fitting phase.
+
+Spot Overlap Penalization
+Throughout both the sequential and simultaneous fitting algorithms, the goodness (SSE) of a fit is penalized when spots overlap. The penalization is proportial to ratio of the area of intersection between spots to the union area of all spots (the Jaccard index).
+
+Differential Rotation
+To account for differential rotation of the stellar surface, spots are allowed to have varied rotational periods, but only in a constrained way. The differential rotation is defined by an equitorial period parameter (Teq) and shearing parameter (alpha) which specifies how the rotational period changes with distance from the equator. Period (T) at a given latitude (theta) is given by
+T = Teq / (1 - alpha * sin(theta)^2)
+
+Parameter comparison
+For comparing the positional spot parameter estimates produced by a fit to known spot parameters (as in the case of testing on synthetic data) the Jaccard index is used as the metric of goodness of fit. The stellar inclination and rotational phases must be compared to their known values separately, and error in these estimates should be considered particularly severe.
+
+Parameter Optimization
+Iterative parameter optimization is done using the Levenberg–Marquardt algorithm, implemented by scipy.optimize.leastsq. Alternative optimization methods can by used by switching to scipy.optimize.minimize.
+
+Clustering in Single-Spot Fits
+The single spot fitting algorithm starts with an evenly spaced grid of initial points in parameter space, and runs the optimization for a small number of steps, then checks for clustering in the results using the K-means algorithm with a fixed number of clusters (default 30) and taking the lowest SSE parameter set from each cluster.
+This uses scipy.cluster.vq.whiten and scipy.cluster.vq.kmeans2.
+
